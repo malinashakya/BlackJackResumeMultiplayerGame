@@ -8,12 +8,12 @@ package blackjackresumemultiplayergame;
  *
  * @author malin
  */
-public class Player {
-    String name;
-    int balance;
-    Player(String name,int balance) {
-        this.name = name;
-        this.balance=balance;
+    public class Player {
+        String name;
+        int balance;
+        Player(String name,int balance) {
+            this.name = name;
+            this.balance=balance;
+        }
+
     }
-    
-}

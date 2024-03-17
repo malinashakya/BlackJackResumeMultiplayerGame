@@ -9,6 +9,8 @@ package blackjackresumemultiplayergame;
  * @author malin
  */
 class GameRecord {
+    String name;
+    int round;
     int card1;
     int card2;
     int card3;

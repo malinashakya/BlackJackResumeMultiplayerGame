@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package blackjackresumemultiplayergame;
 
 /**
@@ -13,6 +9,7 @@ import blackjackresumemultiplayergame.game_type.GameType;
 import blackjackresumemultiplayergame.game_type.GameTypeJQKare10;
 import blackjackresumemultiplayergame.game_type.GameTypeSumIsLessThan17;
 import blackjackresumemultiplayergame.game_type.GameTypeSumIsLessThan21;
+import blackjackresumemultiplayergame.GameDataReader;
 import java.io.*;
 import java.util.*;
 
@@ -104,40 +101,8 @@ public class BlackJackResumeMultiplayerGame {
         System.out.println("Do you want to resume the previous game? (y/n): ");
         char resumeResponse = scanner.next().charAt(0);
         if (resumeResponse == 'y') {
-            try (BufferedReader reader = new BufferedReader(new FileReader("game_history.txt"))) {
-                String line;
-                int round = 0;
-                boolean startReading = false;
-                HashSet<String> uniqueNames = new HashSet<>(); // HashSet to store unique player names
-
-                while ((line = reader.readLine()) != null) {
-                    if (line.startsWith("Name,Round,Card1,Card2,Card3,Bet,Result,Balance")) {
-                        startReading = true;
-                        continue;
-                    }
-                    if (startReading) {
-                        String[] parts = line.split(",");
-                        if (parts.length == 8) {
-                            String playerName = parts[0];
-                            round = Integer.parseInt(parts[1]);
-                            // Add the player name to the HashSet only if it's not already present
-                            uniqueNames.add(playerName);
-                        }
-                    }
-                }
-
-                // Count unique names
-                int uniqueCount = uniqueNames.size();
-                System.out.println("Number of unique players: " + uniqueCount + " ,round played " + round);
-
-                System.out.println("Unique player names:");
-                for (String name : uniqueNames) {
-                    System.out.println(name);
-                }
-
-            } catch (IOException e) {
-                System.err.println("Error reading game history: " + e.getMessage());
-            }
+            GameDataReader gameDataReader = new GameDataReader();
+                List<GameRecord> gameRecords = gameDataReader.readGameRecords("game_history.txt");
         } else if (resumeResponse == 'n') {
             System.out.println("Starting a new game.");
             System.out.println("Welcome to the game of Blackjack!");
