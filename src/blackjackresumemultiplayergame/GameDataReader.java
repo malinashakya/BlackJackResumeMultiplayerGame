@@ -24,7 +24,7 @@ public class GameDataReader {
                 if (card.length() == 2 && card.charAt(0) == '1' && card.charAt(1) == '0') {
                     return "10";
                 } else {
-                    return String.valueOf(card.charAt(0) - 48);
+                    return String.valueOf(card.charAt(0) - '0');
                 }
         }
     }
@@ -67,11 +67,11 @@ public class GameDataReader {
             System.err.println("Error reading game history: " + e.getMessage());
         }
 
-        // Print unique player names
-        System.out.println("Unique player names:");
-        for (String playerName : uniquePlayerNames) {
-            System.out.println(playerName);
-        }
+//        // Print unique player names
+//        System.out.println("Unique player names:");
+//        for (String playerName : uniquePlayerNames) {
+//            System.out.println(playerName);
+//        }
 
         // Display information for each game record
         System.out.println("Game Records:");
