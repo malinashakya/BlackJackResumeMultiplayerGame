@@ -79,9 +79,9 @@ public class BlackJackResumeMultiplayerGame {
                 Player currentPlayer = players[playerIndex];
 
                 String message = currentPlayer.name + "," + count + ","
-                        + display(records[variable].card1) + ","
-                        + display(records[variable].card2) + ","
-                        + display(records[variable].card3) + ","
+                        + records[variable].card1 + ","
+                        + records[variable].card2 + ","
+                        + records[variable].card3 + ","
                         + records[variable].betPoint + ","
                         + records[variable].result + ","
                         + records[variable].balance;
@@ -100,10 +100,53 @@ public class BlackJackResumeMultiplayerGame {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Do you want to resume the previous game? (y/n): ");
         char resumeResponse = scanner.next().charAt(0);
-        if (resumeResponse == 'y') {
-            GameDataReader gameDataReader = new GameDataReader();
-                List<GameRecord> gameRecords = gameDataReader.readGameRecords("game_history.txt");
-        } else if (resumeResponse == 'n') {
+      if (resumeResponse == 'y') {
+    GameDataReader gameDataReader = new GameDataReader();
+    List<GameRecord> gameRecords = gameDataReader.readGameRecords("game_history.txt");
+
+    System.out.println("Select the game condition:");
+    System.out.println("1. Win if sum is less than 21");
+    System.out.println("2. Win if sum is less than 17");
+    System.out.println("3. Win if J, K, Q, A and sum is less than 21");
+    System.out.println("4. Win if J, K, Q are equal to 10, A is equal to 1 and sum is less than 21");
+    
+    int condition = scanner.nextInt();
+    GameType gametype;
+
+    switch (condition) {
+        case 1:
+            gametype = new GameTypeSumIsLessThan21();
+            break;
+        case 2:
+            gametype = new GameTypeSumIsLessThan17();
+            break;
+        case 3:
+            gametype = new GameTypeAJQKare10();
+            break;
+        case 4:
+            gametype = new GameTypeJQKare10();
+            break;
+        default:
+            System.out.println("Wrong selection of game");
+            throw new IllegalArgumentException("Invalid game selection");
+    }
+
+    // Now, you should have the gameRecords and the game type selected
+    for (GameRecord record : gameRecords) {
+        int betPoint = record.betPoint;
+        int card1 = record.card1;
+        int card2 = record.card2;
+        Player player = new Player(record.name, record.balance);
+        int rounds = record.round;
+        
+        // Assuming records is an array of GameRecord
+        GameRecord[] records = new GameRecord[100]; 
+        playgame(betPoint, card1, card2, player, records, rounds, gametype);
+    }
+}
+
+
+         else if (resumeResponse == 'n') {
             System.out.println("Starting a new game.");
             System.out.println("Welcome to the game of Blackjack!");
 
@@ -157,7 +200,6 @@ public class BlackJackResumeMultiplayerGame {
             GameRecord[] records = new GameRecord[100];
 
             // Array to store player balances
-
             System.out.println("\nYou each have 100 points in your accounts.");
 
             // Main game loop
