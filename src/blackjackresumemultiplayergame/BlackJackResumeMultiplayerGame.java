@@ -37,11 +37,12 @@ public class BlackJackResumeMultiplayerGame {
         return new String(temp_card);
     }
 
-    static int playgame(int betPoint, int card1, int card2, Player player, GameRecord[] records, int round,
+    static int playTurn(int betPoint, int card1, int card2, Player player, GameRecord[] records, int round,
             GameType gametype) {
         int card3, sum;
         card3 = random.nextInt(13) + 1;
         sum = gametype.calculate(card1, card2, card3);
+        System.out.println(round);
         records[round] = new GameRecord();
         records[round].card1 = card1;
         records[round].card2 = card2;
@@ -96,6 +97,49 @@ public class BlackJackResumeMultiplayerGame {
         }
     }
 
+    static void playGame(List<Integer> playerBalances,int numPlayers,Player[] players,int rounds, GameRecord[] records,GameType gametype )
+    {
+             while (true) {
+                 Scanner scanner=new Scanner(System.in);
+                 int betPoint,card1,card2;
+                // Loop through each player
+                for (int player = 0; player < numPlayers; player++) {
+                    if (playerBalances.get(player) <= 0) {
+                        System.out.println("Player " + players[player].name + " is out of the game.");
+                        continue;
+                    }
+
+                    card1 = random.nextInt(13) + 1;
+                    card2 = random.nextInt(13) + 1;
+
+                    System.out.println("\nPlayer " + players[player].name + ", your cards are " + display(card1)
+                            + " and " + display(card2));
+                    System.out.println("How many points do you want to bet?");
+
+                    betPoint = scanner.nextInt();
+                    if (betPoint > 0 && betPoint <= playerBalances.get(player)) {
+                        playerBalances.set(player, playTurn(betPoint, card1, card2, players[player], records, rounds, gametype));
+                        rounds++;
+                    } else if (betPoint <= 0) {
+                        System.out.println("Bet point cannot be negative or zero");
+                    } else {
+                        System.out.println("Player " + players[player].name + ", you don't have enough points");
+                    }
+                }
+
+                System.out.print("\nDo you want to continue to the next round? (y/n): ");
+                char response = scanner.next().charAt(0);
+                if (response == 'n') {
+                    break; // Exit the game if the user does not want to continue
+                } else if (response != 'y') {
+                    System.out.println("Wrong input");
+                }
+            }
+             displayHistory(records, rounds, players, numPlayers);
+
+            System.out.println("Game over!!!");
+    }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Do you want to resume the previous game? (y/n): ");
@@ -130,19 +174,37 @@ public class BlackJackResumeMultiplayerGame {
             System.out.println("Wrong selection of game");
             throw new IllegalArgumentException("Invalid game selection");
     }
-
+int rounds=0;
+  Set<String> uniquePlayerNames = new HashSet<>();
     // Now, you should have the gameRecords and the game type selected
     for (GameRecord record : gameRecords) {
-        int betPoint = record.betPoint;
-        int card1 = record.card1;
-        int card2 = record.card2;
-        Player player = new Player(record.name, record.balance);
-        int rounds = record.round;
-        
-        // Assuming records is an array of GameRecord
-        GameRecord[] records = new GameRecord[100]; 
-        playgame(betPoint, card1, card2, player, records, rounds, gametype);
+         uniquePlayerNames.add(record.name); 
+        rounds = record.round;
     }
+    List<Player> players=new ArrayList();
+    for(String playerNames:uniquePlayerNames)
+    {
+        players.add(new Player(playerNames,0));
+    }
+    for(GameRecord record:gameRecords)
+    {
+        for(Player player:players)
+        {
+            if(player.name.equals(record.name))
+            {
+                player.balance=record.balance;
+            }
+        }
+    }
+    int numPlayers=players.size();
+    List<Integer> playerBalances=new ArrayList();
+    for(int i=0; i<numPlayers;i++)
+    {
+        playerBalances.add(players.get(i).balance);
+    }
+    
+    
+     playGame(playerBalances,numPlayers,(Player [])players.toArray(new Player[numPlayers]),rounds, (GameRecord[])gameRecords.toArray(new GameRecord[100]),gametype );
 }
 
 
@@ -196,7 +258,7 @@ public class BlackJackResumeMultiplayerGame {
                 System.out.println("Player " + (i + 1) + ": " + players[i].name);
             }
 
-            int betPoint, card1, card2, rounds = 0;
+            int rounds = 0;
             GameRecord[] records = new GameRecord[100];
 
             // Array to store player balances
@@ -208,44 +270,9 @@ public class BlackJackResumeMultiplayerGame {
                 playerBalances.add(startingPoints);
             }
 
-            while (true) {
-                // Loop through each player
-                for (int player = 0; player < numPlayers; player++) {
-                    if (playerBalances.get(player) <= 0) {
-                        System.out.println("Player " + players[player].name + " is out of the game.");
-                        continue;
-                    }
+       playGame(playerBalances,numPlayers,players,rounds, records,gametype );
 
-                    card1 = random.nextInt(13) + 1;
-                    card2 = random.nextInt(13) + 1;
-
-                    System.out.println("\nPlayer " + players[player].name + ", your cards are " + display(card1)
-                            + " and " + display(card2));
-                    System.out.println("How many points do you want to bet?");
-
-                    betPoint = scanner.nextInt();
-                    if (betPoint > 0 && betPoint <= playerBalances.get(player)) {
-                        playerBalances.set(player, playgame(betPoint, card1, card2, players[player], records, rounds, gametype));
-                        rounds++;
-                    } else if (betPoint <= 0) {
-                        System.out.println("Bet point cannot be negative or zero");
-                    } else {
-                        System.out.println("Player " + players[player].name + ", you don't have enough points");
-                    }
-                }
-
-                System.out.print("\nDo you want to continue to the next round? (y/n): ");
-                char response = scanner.next().charAt(0);
-                if (response == 'n') {
-                    break; // Exit the game if the user does not want to continue
-                } else if (response != 'y') {
-                    System.out.println("Wrong input");
-                }
-            }
-
-            displayHistory(records, rounds, players, numPlayers);
-
-            System.out.println("Game over!!!");
+            
         }
     }
 }

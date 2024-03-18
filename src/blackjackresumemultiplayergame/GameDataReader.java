@@ -31,7 +31,7 @@ public class GameDataReader {
 
     public static List<GameRecord> readGameRecords(String filename) {
         List<GameRecord> gameRecords = new ArrayList<>();
-        Set<String> uniquePlayerNames = new HashSet<>();
+      
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
@@ -48,7 +48,7 @@ public class GameDataReader {
                         GameRecord record = new GameRecord();
                         String card1, card2, card3;
                         record.name = parts[0];
-                        uniquePlayerNames.add(record.name); // Add the name to the set
+                       // Add the name to the set
                         record.round = Integer.parseInt(parts[1]);
                         card1 = reverseDisplay(parts[2]);
                         card2 = reverseDisplay(parts[3]);
