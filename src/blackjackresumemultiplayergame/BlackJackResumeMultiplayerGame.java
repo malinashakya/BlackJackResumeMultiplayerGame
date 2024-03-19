@@ -72,21 +72,21 @@ public class BlackJackResumeMultiplayerGame {
             writer.write("Name,Round,Card1,Card2,Card3,Bet,Result,Balance\n");
             System.out.println("Name,Round,Card1,Card2,Card3,Bet,Result,Balance");
 
-            int count = 0;
-            for (int variable = 0; variable < rounds; variable++) {
-                if (variable % numPlayers == 0) {
-                    count++;
+            int round = 0;
+            for (int turns = 0; turns < rounds; turns++) {
+                if (turns % numPlayers == 0) {
+                    round++;
                 }
-                int playerIndex = variable % numPlayers;
+                int playerIndex = turns % numPlayers;
                 Player currentPlayer = players.get(playerIndex);
 
-                String message = currentPlayer.name + "," + count + ","
-                        + records.get(variable).card1 + ","
-                        + records.get(variable).card2 + ","
-                        + records.get(variable).card3 + ","
-                        + records.get(variable).betPoint + ","
-                        + records.get(variable).result + ","
-                        + records.get(variable).balance;
+                String message = currentPlayer.name + "," + round + ","
+                        + records.get(turns).card1 + ","
+                        + records.get(turns).card2 + ","
+                        + records.get(turns).card3 + ","
+                        + records.get(turns).betPoint + ","
+                        + records.get(turns).result + ","
+                        + records.get(turns).balance;
 
                 System.out.println(message);
                 writer.write(message + "\n");
@@ -198,7 +198,8 @@ public class BlackJackResumeMultiplayerGame {
             }
             int numPlayers = players.size();
 
-            playGame(numPlayers, players, rounds, gameRecords, gametype);
+            playGame(numPlayers, players, gameRecords.size(), gameRecords, gametype);
+            
         } else if (resumeResponse == 'n') {
             System.out.println("Starting a new game.");
             System.out.println("Welcome to the game of Blackjack!");
