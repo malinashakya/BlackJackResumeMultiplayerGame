@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class GameDataReader {
 
@@ -66,12 +64,6 @@ public class GameDataReader {
         } catch (IOException e) {
             System.err.println("Error reading game history: " + e.getMessage());
         }
-
-//        // Print unique player names
-//        System.out.println("Unique player names:");
-//        for (String playerName : uniquePlayerNames) {
-//            System.out.println(playerName);
-//        }
 
         // Display information for each game record
         System.out.println("Game Records:");
