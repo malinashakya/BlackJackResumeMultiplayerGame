@@ -16,6 +16,8 @@ import java.util.*;
 public class BlackJackResumeMultiplayerGame {
 
     public static Random random = new Random();
+    
+    //Card displays like the playing card type A,J,Q,K
 
     public static String display(int card) {
         char[] temp_card = new char[3];
@@ -37,6 +39,8 @@ public class BlackJackResumeMultiplayerGame {
         return new String(temp_card);
     }
 
+    //Euta player le khelne single record
+  
     static int playTurn(int betPoint, int card1, int card2, Player player, List<GameRecord> records, int round,
             GameType gametype) {
         int card3, sum;
@@ -67,11 +71,13 @@ public class BlackJackResumeMultiplayerGame {
         return player.balance;
     }
 
-    static void displayHistory(List<GameRecord> records, int rounds, List<Player> players, int numPlayers) {
+    //History of game display garne
+   
+    static void displayHistory(List<GameRecord> records, int rounds, List<Player> players) {
         try (Writer writer = new FileWriter("game_history.txt")) {
             writer.write("Name,Round,Card1,Card2,Card3,Bet,Result,Balance\n");
             System.out.println("Name,Round,Card1,Card2,Card3,Bet,Result,Balance");
-
+            int numPlayers = players.size();
             int round = 0;
             for (int turns = 0; turns < rounds; turns++) {
                 if (turns % numPlayers == 0) {
@@ -97,13 +103,14 @@ public class BlackJackResumeMultiplayerGame {
             System.err.println("Error writing game history to file: " + e.getMessage());
         }
     }
+    //Actual game play rules
 
-    static void playGame(int numPlayers, List<Player> players, int rounds, List<GameRecord> records, GameType gametype) {
+    static void playGame(List<Player> players, int rounds, List<GameRecord> records, GameType gametype) {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             int betPoint, card1, card2;
             // Loop through each player
-
+            int numPlayers = players.size();
             for (int player = 0; player < numPlayers; player++) {
                 if (players.get(player).balance <= 0) {
                     System.out.println("Player " + players.get(player).name + " is out of the game.");
@@ -135,14 +142,77 @@ public class BlackJackResumeMultiplayerGame {
             } else if (response != 'y') {
                 System.out.println("Wrong input");
             }
-            
+
         }
         System.out.println("Rounds:"
-                    + rounds);
-        displayHistory(records, rounds, players, numPlayers);
+                + rounds);
+        displayHistory(records, rounds, players);
 
         System.out.println("Game over!!!");
     }
+    
+    //Records of Players
+
+    static List<Player> getPlayer(Scanner scanner) {
+        int numPlayers;
+        System.out.print("Enter the number of players (1-17): ");
+        numPlayers = scanner.nextInt();
+
+        if (numPlayers < 1 || numPlayers > 17) {
+            System.out.println("Invalid number of players. Exiting...");
+            return null; // Return null indicating failure
+        }
+
+        int startingPoints = 100;
+        List<Player> players = new ArrayList<>();
+        for (int i = 0; i < numPlayers; i++) {
+            System.out.print("Enter name of Player " + (i + 1) + ": ");
+            String playerName = scanner.next();
+            players.add(new Player(playerName, startingPoints));
+        }
+
+        System.out.println("Names of players:");
+        for (int i = 0; i < numPlayers; i++) {
+            System.out.println("Player " + (i + 1) + ": " + players.get(i).name);
+        }
+
+        return players; // Return the list of players
+    }
+
+    //Game Condition Selection
+    
+    static GameType selectGameCondition(Scanner scanner) {
+        System.out.println("Select the game condition:");
+        System.out.println("1. Win if sum is less than 21");
+        System.out.println("2. Win if sum is less than 17");
+        System.out.println("3. Win if J, K, Q, A and sum is less than 21");
+        System.out.println("4. Win if J, K, Q are equal to 10, A is equal to 1 and sum is less than 21");
+
+        int condition = scanner.nextInt();
+        GameType gametype;
+
+        switch (condition) {
+            case 1:
+                gametype = new GameTypeSumIsLessThan21();
+                break;
+            case 2:
+                gametype = new GameTypeSumIsLessThan17();
+                break;
+            case 3:
+                gametype = new GameTypeAJQKare10();
+                break;
+            case 4:
+                gametype = new GameTypeJQKare10();
+                break;
+            default:
+                System.out.println("Wrong selection of game");
+                throw new IllegalArgumentException("Invalid game selection");
+        }
+
+        return gametype;
+    }
+
+    //Main
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -152,32 +222,7 @@ public class BlackJackResumeMultiplayerGame {
             GameDataReader gameDataReader = new GameDataReader();
             List<GameRecord> gameRecords = gameDataReader.readGameRecords("game_history.txt");
 
-            System.out.println("Select the game condition:");
-            System.out.println("1. Win if sum is less than 21");
-            System.out.println("2. Win if sum is less than 17");
-            System.out.println("3. Win if J, K, Q, A and sum is less than 21");
-            System.out.println("4. Win if J, K, Q are equal to 10, A is equal to 1 and sum is less than 21");
-
-            int condition = scanner.nextInt();
-            GameType gametype;
-
-            switch (condition) {
-                case 1:
-                    gametype = new GameTypeSumIsLessThan21();
-                    break;
-                case 2:
-                    gametype = new GameTypeSumIsLessThan17();
-                    break;
-                case 3:
-                    gametype = new GameTypeAJQKare10();
-                    break;
-                case 4:
-                    gametype = new GameTypeJQKare10();
-                    break;
-                default:
-                    System.out.println("Wrong selection of game");
-                    throw new IllegalArgumentException("Invalid game selection");
-            }
+            GameType gametype = selectGameCondition(scanner);
             int rounds = 0;
             Set<String> uniquePlayerNames = new HashSet<>();
             // Now, you should have the gameRecords and the game type selected
@@ -196,66 +241,21 @@ public class BlackJackResumeMultiplayerGame {
                     }
                 }
             }
-            int numPlayers = players.size();
 
-            playGame(numPlayers, players, gameRecords.size(), gameRecords, gametype);
-            
+            playGame(players, gameRecords.size(), gameRecords, gametype);
+
         } else if (resumeResponse == 'n') {
             System.out.println("Starting a new game.");
             System.out.println("Welcome to the game of Blackjack!");
 
-            int condition;
-            GameType gametype = null;
-
-            System.out.println("Select the game condition:");
-            System.out.println("1. Win if sum is less than 21");
-            System.out.println("2. Win if sum is less than 17");
-            System.out.println("3. Win if J, K, Q, A and sum is less than 21");
-            System.out.println("4. Win if J, K, Q are equal to 10, A is equal to 1 and sum is less than 21");
-            condition = scanner.nextInt();
-
-            gametype = switch (condition) {
-                case 1 ->
-                    new GameTypeSumIsLessThan21();
-                case 2 ->
-                    new GameTypeSumIsLessThan17();
-                case 3 ->
-                    new GameTypeAJQKare10();
-                case 4 ->
-                    new GameTypeJQKare10();
-                default -> {
-                    System.out.println("Wrong selection of game");
-                    throw new IllegalArgumentException("Invalid game selection");
-                }
-            };
-
-            int numPlayers;
-            System.out.print("Enter the number of players (1-17): ");
-            numPlayers = scanner.nextInt();
-
-            if (numPlayers < 1 || numPlayers > 17) {
-                System.out.println("Invalid number of players. Exiting...");
-                return;
-            }
-            int startingPoints = 100;
-            List<Player> players = new ArrayList<>();
-            for (int i = 0; i < numPlayers; i++) {
-                System.out.print("Enter name of Player " + (i + 1) + ": ");
-                String playerName = scanner.next();
-                players.add(new Player(playerName, startingPoints));
-            }
-
-            System.out.println("Names of players:");
-            for (int i = 0; i < numPlayers; i++) {
-                System.out.println("Player " + (i + 1) + ": " + players.get(i).name);
-            }
-
+            GameType gametype = selectGameCondition(scanner);
             int rounds = 0;
             //Changed to List
             List<GameRecord> records = new ArrayList<>();
+            List<Player> players = getPlayer(scanner);
             System.out.println("\nYou each have 100 points in your accounts.");
 
-            playGame(numPlayers, players, rounds, records, gametype);
+            playGame(players, rounds, records, gametype);
 
         }
     }
