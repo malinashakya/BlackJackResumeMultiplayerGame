@@ -16,9 +16,8 @@ import java.util.*;
 public class BlackJackResumeMultiplayerGame {
 
     public static Random random = new Random();
-    
-    //Card displays like the playing card type A,J,Q,K
 
+    //Card displays like the playing card type A,J,Q,K
     public static String display(int card) {
         char[] temp_card = new char[3];
         temp_card[2] = '\0';
@@ -40,7 +39,6 @@ public class BlackJackResumeMultiplayerGame {
     }
 
     //Euta player le khelne single record
-  
     static int playTurn(int betPoint, int card1, int card2, Player player, List<GameRecord> records, int round,
             GameType gametype) {
         int card3, sum;
@@ -72,12 +70,12 @@ public class BlackJackResumeMultiplayerGame {
     }
 
     //History of game display garne
-   
-    static void displayHistory(List<GameRecord> records, int rounds, List<Player> players) {
+    static void displayHistory(List<GameRecord> records, List<Player> players) {
         try (Writer writer = new FileWriter("game_history.txt")) {
             writer.write("Name,Round,Card1,Card2,Card3,Bet,Result,Balance\n");
             System.out.println("Name,Round,Card1,Card2,Card3,Bet,Result,Balance");
             int numPlayers = players.size();
+            int rounds = records.size();
             int round = 0;
             for (int turns = 0; turns < rounds; turns++) {
                 if (turns % numPlayers == 0) {
@@ -105,8 +103,9 @@ public class BlackJackResumeMultiplayerGame {
     }
     //Actual game play rules
 
-    static void playGame(List<Player> players, int rounds, List<GameRecord> records, GameType gametype) {
+    static void playGame(List<Player> players, List<GameRecord> records, GameType gametype) {
         Scanner scanner = new Scanner(System.in);
+        int rounds = records.size();
         while (true) {
             int betPoint, card1, card2;
             // Loop through each player
@@ -146,13 +145,12 @@ public class BlackJackResumeMultiplayerGame {
         }
         System.out.println("Rounds:"
                 + rounds);
-        displayHistory(records, rounds, players);
+        displayHistory(records, players);
 
         System.out.println("Game over!!!");
     }
-    
-    //Records of Players
 
+    //Records of Players
     static List<Player> getPlayer(Scanner scanner) {
         int numPlayers;
         System.out.print("Enter the number of players (1-17): ");
@@ -180,7 +178,6 @@ public class BlackJackResumeMultiplayerGame {
     }
 
     //Game Condition Selection
-    
     static GameType selectGameCondition(Scanner scanner) {
         System.out.println("Select the game condition:");
         System.out.println("1. Win if sum is less than 21");
@@ -213,7 +210,6 @@ public class BlackJackResumeMultiplayerGame {
     }
 
     //Main
-
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Do you want to resume the previous game? (y/n): ");
@@ -221,41 +217,26 @@ public class BlackJackResumeMultiplayerGame {
         if (resumeResponse == 'y') {
             GameDataReader gameDataReader = new GameDataReader();
             List<GameRecord> gameRecords = gameDataReader.readGameRecords("game_history.txt");
-
             GameType gametype = selectGameCondition(scanner);
-            int rounds = 0;
-            Set<String> uniquePlayerNames = new HashSet<>();
+            //key:String type, value: Player type
+            HashMap<String, Player> players = new HashMap<>();
             // Now, you should have the gameRecords and the game type selected
             for (GameRecord record : gameRecords) {
-                uniquePlayerNames.add(record.name);
-                rounds = record.round;
+                players.put(record.name, new Player(record.name, record.balance));
             }
-            List<Player> players = new ArrayList<>();
-            for (String playerNames : uniquePlayerNames) {
-                players.add(new Player(playerNames, 0));
-            }
-            for (GameRecord record : gameRecords) {
-                for (Player player : players) {
-                    if (player.name.equals(record.name)) {
-                        player.balance = record.balance;
-                    }
-                }
-            }
-
-            playGame(players, gameRecords.size(), gameRecords, gametype);
+            playGame(new ArrayList(players.values()), gameRecords, gametype);
 
         } else if (resumeResponse == 'n') {
             System.out.println("Starting a new game.");
             System.out.println("Welcome to the game of Blackjack!");
-
             GameType gametype = selectGameCondition(scanner);
-            int rounds = 0;
+
             //Changed to List
             List<GameRecord> records = new ArrayList<>();
             List<Player> players = getPlayer(scanner);
             System.out.println("\nYou each have 100 points in your accounts.");
 
-            playGame(players, rounds, records, gametype);
+            playGame(players, records, gametype);
 
         }
     }
